@@ -1,0 +1,44 @@
+{
+  "name": "api-notes",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "lint": "eslint .",
+    "test": "cross-env NODE_ENV=test PORT=3002 NODE_OPTIONS=--experimental-vm-modules jest --runInBand --silent",
+    "test:watch": "npm run test -- --watchAll"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.0.1",
+    "eslint-plugin-jest": "^26.4.6",
+    "express": "4.18.1",
+    "mongoose": "6.3.5"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "eslint-plugin-react": "7.30.0",
+    "jest": "28.1.0",
+    "nodemon": "2.0.16",
+    "standard": "17.0.0",
+    "supertest": "^6.2.3"
+  },
+  "engines": {
+    "node": "17.1.0"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json",
+    "env": {
+      "jest": true
+    }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true
+  }
+}
