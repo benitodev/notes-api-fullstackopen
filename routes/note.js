@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import Note from '../models/Note.js'
-
+import User from '../models/User.js'
 const router = Router()
 
 router.get('/', async (req, res) => {
@@ -28,15 +28,20 @@ router.post('/', async (req, res) => {
   try {
     const body = req.body
     if (!body.content) return res.status(400).json({ error: 'no body content' })
+    const user = await User.findById(body.userId)
+    console.log(user)
     const note = new Note({
       content: body.content,
       important: body.important,
-      date: new Date()
+      date: new Date(),
+      user: user._id
     })
 
-    await note.save()
+    const savedNote = await note.save()
 
-    res.status(201).json({ message: 'note created' })
+    user.notes = user.notes.concat(savedNote._id)
+    await user.save()
+    res.status(201).json({ content: savedNote, message: 'note created' })
   } catch (err) {
     res.status(500).json({ error: 'not found' })
   }
