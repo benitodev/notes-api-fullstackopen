@@ -1,8 +1,7 @@
 import mongoose from 'mongoose'
 import server from '../index.js'
-import { api, getAllContentFromNotes, initialNotes } from './helpers/notes.js'
-
 import Note from '../models/Note.js'
+import { api, getAllContentFromNotes, initialNotes, nonExistingId } from './helpers/notes.js'
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -29,7 +28,7 @@ describe('NOTES AT THE BEGINNING', () => {
   })
 })
 
-describe('GET ALL NOTES', () => {
+describe('POST NOTE', () => {
   test('a valid note can be added', async () => {
     const newNOte = {
       content: 'New note is added',
@@ -41,7 +40,6 @@ describe('GET ALL NOTES', () => {
     expect(notes).toHaveLength(initialNotes.length + 1)
     expect(contents).toContain('New note is added')
   })
-
   test('note without content is not added', async () => {
     const newNote = {
       important: true
@@ -54,6 +52,9 @@ describe('GET ALL NOTES', () => {
   })
 })
 
+describe('GET ALL NOTES', () => {
+})
+
 describe('GET A SPECIFIC NOTE', () => {
   test('a specific note can be viewed', async () => {
     const { notes } = await getAllContentFromNotes()
@@ -61,6 +62,16 @@ describe('GET A SPECIFIC NOTE', () => {
     const getNoteToView = await api.get(`/api/notes/${noteToView.id}`).expect(201).expect('Content-Type', /json/)
     const copyNoteToView = JSON.parse(JSON.stringify(noteToView))
     expect(getNoteToView.body.content).toEqual(copyNoteToView)
+  })
+  test('statuscode is 404 if note does not exist', async () => {
+    const notExists = await nonExistingId()
+    console.log(notExists)
+    await api.get(`/api/notes/${notExists}`).expect(404)
+  })
+  test('statuscode is 400 if id is invalid', async () => {
+    const invalidId = '2341512ad231ff2'
+
+    await api.get(`/api/notes/${invalidId}`).expect(400)
   })
 })
 
