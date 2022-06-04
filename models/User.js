@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
   name: String,
-  username: { type: String, unique: true },
+  username: String,
   passwordHash: String,
   notes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }]
 })

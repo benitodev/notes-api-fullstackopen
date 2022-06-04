@@ -1,11 +1,23 @@
 import { Router } from 'express'
 import Note from '../models/Note.js'
 import User from '../models/User.js'
+import jwt from 'jsonwebtoken'
 const router = Router()
+
+const getTokenFrom = (req) => {
+  const authorization = req.get('Authorization')
+  console.log(authorization)
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    console.log(authorization)
+    return authorization.substring(7)
+  }
+
+  return null
+}
 
 router.get('/', async (req, res) => {
   try {
-    const notes = await Note.find({})
+    const notes = await Note.find({}).populate('user', { username: 1, name: 1 })
 
     res.status(200).json({ content: notes })
   } catch (err) {
@@ -28,7 +40,13 @@ router.post('/', async (req, res) => {
   try {
     const body = req.body
     if (!body.content) return res.status(400).json({ error: 'no body content' })
-    const user = await User.findById(body.userId)
+    console.log(2)
+    const token = getTokenFrom(req)
+    console.log(token)
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!decodedToken.id) { return res.status(401).json({ error: 'token missing or invalid' }) }
+
+    const user = await User.findById(decodedToken.id)
     console.log(user)
     const note = new Note({
       content: body.content,
@@ -52,6 +70,7 @@ router.delete('/:id', async (req, res, next) => {
     const noteId = req.params.id
     const noteToDelete = await Note.findByIdAndRemove(noteId)
     console.log(noteToDelete)
+    // const user = await User.findById({_id: })
     if (!noteToDelete) return res.status(404).json({ error: "note doesn't exist" })
     res.status(204).json({ message: 'successfully deleted' })
   } catch (err) {
