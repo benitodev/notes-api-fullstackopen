@@ -6,12 +6,9 @@ const router = Router()
 
 const getTokenFrom = (req) => {
   const authorization = req.get('Authorization')
-  console.log(authorization)
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    console.log(authorization)
     return authorization.substring(7)
   }
-
   return null
 }
 
@@ -40,14 +37,12 @@ router.post('/', async (req, res) => {
   try {
     const body = req.body
     if (!body.content) return res.status(400).json({ error: 'no body content' })
-    console.log(2)
+
     const token = getTokenFrom(req)
-    console.log(token)
     const decodedToken = jwt.verify(token, process.env.SECRET)
     if (!decodedToken.id) { return res.status(401).json({ error: 'token missing or invalid' }) }
 
     const user = await User.findById(decodedToken.id)
-    console.log(user)
     const note = new Note({
       content: body.content,
       important: body.important,
@@ -56,11 +51,12 @@ router.post('/', async (req, res) => {
     })
 
     const savedNote = await note.save()
-
+    console.log('before savedNote')
     user.notes = user.notes.concat(savedNote._id)
     await user.save()
     res.status(201).json({ content: savedNote, message: 'note created' })
   } catch (err) {
+    console.log(err)
     res.status(500).json({ error: 'not found' })
   }
 })
@@ -68,10 +64,21 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const noteId = req.params.id
-    const noteToDelete = await Note.findByIdAndRemove(noteId)
+    const noteToDelete = await Note.findByIdAndDelete(noteId)
     console.log(noteToDelete)
-    // const user = await User.findById({_id: })
     if (!noteToDelete) return res.status(404).json({ error: "note doesn't exist" })
+    const token = getTokenFrom(req)
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    const user = await User.findById({ _id: decodedToken.id })
+    console.log(noteId)
+    // eslint-disable-next-line eqeqeq
+    const itemToRemove = user.notes.find(note => note == noteId)
+    console.log(itemToRemove, 'item to remove')
+    if (itemToRemove) {
+      user.notes.pull(itemToRemove)
+      await user.save()
+    }
+    if (!decodedToken.id) { return res.status(401).json({ error: 'token missing or invalid' }) }
     res.status(204).json({ message: 'successfully deleted' })
   } catch (err) {
     next(err)
