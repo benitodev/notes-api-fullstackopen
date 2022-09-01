@@ -11,8 +11,8 @@ API for create notes.
 you can see how to handle the backend to test (NODE_ENV). 
 
 ### API
-- **Notes**: https://notes-api-fullstackopen.herokuapp.com/api/notes
-- **Login**: https://notes-api-fullstackopen.herokuapp.com/api/login
+- **Notes**: https://notes-api-fullstackopen-production.up.railway.app/api/notes
+- **Login**: https://notes-api-fullstackopen-production.up.railway.app/api/login
 
 
 ## Technologies
